@@ -22,12 +22,14 @@ class AuthService with ChangeNotifier {
     notifyListeners();
   }
 
+ // String get userId => usuario?.uid ?? '';
+
   //Getters del token de forma estática
 
-  static Future<String?> getToken() async {
+  static Future<String> getToken() async {
     final storage = FlutterSecureStorage();
     final token = await storage.read(key: 'token');
-    return token;
+    return token ?? '';
   }
 
   static Future<void> deleteToken() async {
@@ -83,10 +85,13 @@ class AuthService with ChangeNotifier {
   }
 
   Future<bool> isLoggedIn() async {
-    final token = await _storage.read(key: 'token');
+    final token = await _storage.read(key: 'token') ??  '';
+
+    if (token.isEmpty) return false; 
+
     final resp = await http.get(
       Uri.parse('${Environment.apiUrl}/login/renew'),
-      headers: {'Content-Type': 'application/json', 'x-token': ?token},
+      headers: {'Content-Type': 'application/json', 'x-token': token},
     );
 
     if (resp.statusCode == 200) {
